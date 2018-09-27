@@ -1,0 +1,7 @@
+- peline.id: main
+  path.config: "/usr/share/logstash/pipeline"
+  pipeline.workers: 3
+- pipeline.id: my-data-pipeline
+  path.config: "/usr/share/logstash/pipeline/stock_data_import.conf"
+  queue.type: persisted
+

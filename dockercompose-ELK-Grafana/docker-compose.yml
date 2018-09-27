@@ -1,0 +1,58 @@
+version: '2'
+
+services:
+  elasticsearch:
+    image: bigdata15/elasticsearch632:v2
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ELASTICSEARCH_URL: localhost
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - docker_elk
+
+  logstash:
+    image: bigdata15/logstash632:v2
+    container_name: logstash
+    volumes:
+      - /home/big/nba/:/usr/share/logstash/data
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - docker_elk
+    depends_on: ['elasticsearch']
+
+  kibana:
+    container_name: kibana
+    image: bigdata15/kibana632:v2
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      elasticsearch.username: "admin"
+      elasticsearch.password: "admin"
+    networks:
+      - docker_elk
+    depends_on: ['elasticsearch']
+
+  metricbeast:
+    image: bigdata15/metricbeat632:v2
+    container_name: metricbeat
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    networks:
+      - docker_elk
+    depends_on: ['elasticsearch', 'kibana']
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - docker_elk
+    depends_on: ['elasticsearch']
+networks:
+  docker_elk:
+    driver: bridge
